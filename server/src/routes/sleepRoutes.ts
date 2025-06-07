@@ -249,4 +249,57 @@ export const createSleepRoutes = (context: AppContext) => async (fastify: Fastif
     },
     sleepRecordController.deleteSleepRecord
   )
+
+  // 수면 통계 조회
+  fastify.get(
+    '/sleep-statistics',
+    {
+      schema: {
+        description: '수면 통계 조회 - 전체 평균, 요일별 평균, 주간별 추이',
+        tags: ['Sleep Statistics'],
+        response: {
+          200: {
+            type: 'object',
+            properties: {
+              success: { type: 'boolean' },
+              data: {
+                type: 'object',
+                properties: {
+                  overallAverage: {
+                    type: 'number',
+                    description: '전체 평균 수면시간'
+                  },
+                  weeklyAverages: {
+                    type: 'object',
+                    properties: {
+                      일: { type: 'number' },
+                      월: { type: 'number' },
+                      화: { type: 'number' },
+                      수: { type: 'number' },
+                      목: { type: 'number' },
+                      금: { type: 'number' },
+                      토: { type: 'number' }
+                    },
+                    description: '요일별 평균 수면시간'
+                  },
+                  weeklyTrends: {
+                    type: 'array',
+                    items: {
+                      type: 'object',
+                      properties: {
+                        week: { type: 'string' },
+                        average: { type: 'number' }
+                      }
+                    },
+                    description: '주간별 평균 수면시간 추이'
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    sleepRecordController.getSleepStatistics
+  )
 }

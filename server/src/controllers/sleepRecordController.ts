@@ -148,12 +148,23 @@ export const createSleepRecordController = ({ sleepRecordService }: SleepRecordC
     }
   }
 
+  const getSleepStatistics = async (request: FastifyRequest, reply: FastifyReply) => {
+    try {
+      const statistics = await sleepRecordService.getSleepStatistics()
+      return reply.code(200).send(createSuccessResponse(statistics))
+    } catch (error) {
+      request.log.error(error)
+      return reply.code(500).send(createErrorResponse('수면 통계를 불러오는데 실패했습니다.'))
+    }
+  }
+
   return {
     getAllSleepRecords,
     getSleepRecordById,
     createSleepRecord,
     updateSleepRecord,
-    deleteSleepRecord
+    deleteSleepRecord,
+    getSleepStatistics
   }
 }
 

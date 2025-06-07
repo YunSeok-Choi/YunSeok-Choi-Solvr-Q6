@@ -44,6 +44,63 @@ const initialUsers = [
   }
 ]
 
+// 더미 수면 기록 데이터 생성 함수 (통계 테스트용)
+// 실제 프로덕션 환경에서는 실행되지 않습니다
+async function insertDummySleepRecords(db: any) {
+  try {
+    // 기존 수면 기록 데이터 확인
+    const existingSleepRecords = await db.select().from(sleepRecords)
+    console.log(`기존 수면 기록 수: ${existingSleepRecords.length}`)
+
+    if (existingSleepRecords.length > 0) {
+      console.log('수면 기록 데이터가 이미 존재합니다. 더미 데이터 삽입을 건너뜁니다.')
+      return
+    }
+
+    console.log('더미 수면 기록 데이터 생성 중... (30일치)')
+
+    // 더미 데이터 생성을 위한 설정
+    const dummyNotes = ['좋음', '보통', '나쁨']
+    const sleepRecordsData = []
+
+    // 오늘 기준 30일 전부터 어제까지의 데이터 생성
+    for (let i = 30; i >= 1; i--) {
+      const date = new Date()
+      date.setDate(date.getDate() - i)
+
+      // YYYY-MM-DD 형식으로 날짜 포맷
+      const formattedDate = date.toISOString().split('T')[0]
+
+      // 4~9시간 사이의 랜덤 수면 시간 (0.5 단위)
+      const randomHours = Math.round((Math.random() * (9 - 4) + 4) * 2) / 2
+
+      // 랜덤 메모
+      const randomNote = dummyNotes[Math.floor(Math.random() * dummyNotes.length)]
+
+      // 현재 시간을 createdAt, updatedAt으로 사용
+      const currentTime = new Date().toISOString()
+
+      sleepRecordsData.push({
+        date: formattedDate,
+        hours: randomHours,
+        note: randomNote,
+        createdAt: currentTime,
+        updatedAt: currentTime
+      })
+    }
+
+    // 배치로 데이터 삽입
+    for (const record of sleepRecordsData) {
+      await db.insert(sleepRecords).values(record)
+    }
+
+    console.log(`✅ ${sleepRecordsData.length}개의 더미 수면 기록이 생성되었습니다.`)
+    console.log(`📊 수면 시간 범위: 4.0~9.0시간, 메모: ${dummyNotes.join(', ')}`)
+  } catch (error) {
+    console.error('더미 수면 기록 데이터 삽입 중 오류:', error)
+  }
+}
+
 // 데이터베이스 마이그레이션 및 초기 데이터 삽입
 async function runMigration() {
   try {
@@ -85,9 +142,10 @@ async function runMigration() {
     console.log('초기 데이터 삽입 중...')
 
     // 기존 데이터 확인
-    const existingUsers = db.select().from(users)
+    const existingUsers = await db.select().from(users)
+    console.log(`기존 사용자 수: ${existingUsers.length}`)
 
-    if ((await existingUsers).length === 0) {
+    if (existingUsers.length === 0) {
       // 초기 사용자 데이터 삽입
       for (const user of initialUsers) {
         await db.insert(users).values(user)
@@ -95,6 +153,12 @@ async function runMigration() {
       console.log(`${initialUsers.length}명의 사용자가 추가되었습니다.`)
     } else {
       console.log('사용자 데이터가 이미 존재합니다. 초기 데이터 삽입을 건너뜁니다.')
+    }
+
+    // 더미 수면 기록 데이터 삽입 (개발/테스트용)
+    // 실제 프로덕션에서는 NODE_ENV 조건으로 비활성화
+    if (env.NODE_ENV === 'development' || env.NODE_ENV === 'test') {
+      await insertDummySleepRecords(db)
     }
 
     console.log('데이터베이스 마이그레이션이 완료되었습니다.')
