@@ -16,13 +16,19 @@ const MainLayout = () => {
                 to="/"
                 className="text-neutral-600 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium"
               >
-                수면 기록
+                🏠 대시보드
               </Link>
               <Link
-                to="/sleep/new"
+                to="/records"
                 className="text-neutral-600 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium"
               >
-                새 기록
+                📝 수면 기록
+              </Link>
+              <Link
+                to="/sleep/badges"
+                className="text-neutral-600 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium"
+              >
+                🏆 뱃지
               </Link>
               <Link
                 to="/sleep/statistics"
@@ -40,7 +46,7 @@ const MainLayout = () => {
                 to="/users"
                 className="text-neutral-600 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium"
               >
-                유저 관리
+                👥 유저 관리
               </Link>
             </nav>
           </div>
