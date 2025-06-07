@@ -31,6 +31,12 @@ const MainLayout = () => {
                 📊 통계
               </Link>
               <Link
+                to="/sleep/ai-advice"
+                className="text-neutral-600 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium"
+              >
+                🤖 AI 조언
+              </Link>
+              <Link
                 to="/users"
                 className="text-neutral-600 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium"
               >

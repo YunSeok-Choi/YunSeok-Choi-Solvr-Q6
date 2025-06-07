@@ -5,6 +5,7 @@ import { initializeDatabase, getDb } from './db'
 import runMigration from './db/migrate'
 import { createUserService } from './services/userService'
 import { createSleepRecordService } from './services/sleepRecordService'
+import { createAIAdvisorService } from './services/aiAdvisorService'
 import { createRoutes } from './routes'
 import { AppContext } from './types/context'
 
@@ -40,7 +41,8 @@ async function start() {
     const db = await getDb()
     const context: AppContext = {
       userService: createUserService({ db }),
-      sleepRecordService: createSleepRecordService({ db })
+      sleepRecordService: createSleepRecordService({ db }),
+      aiAdvisorService: createAIAdvisorService({ apiKey: env.GEMINI_API_KEY || '' })
     }
 
     // 라우트 등록
