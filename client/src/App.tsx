@@ -1,17 +1,25 @@
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, Navigate } from 'react-router-dom'
 import MainLayout from './layouts/MainLayout'
 import HomePage from './routes/HomePage'
 import UsersPage from './routes/UsersPage'
 import UserDetailPage from './routes/UserDetailPage'
 import CreateUserPage from './routes/CreateUserPage'
 import EditUserPage from './routes/EditUserPage'
+import SleepListPage from './routes/sleep/SleepListPage'
+import SleepCreatePage from './routes/sleep/SleepCreatePage'
+import SleepEditPage from './routes/sleep/SleepEditPage'
 import NotFoundPage from './routes/NotFoundPage'
 
 function App() {
   return (
     <Routes>
       <Route path="/" element={<MainLayout />}>
-        <Route index element={<HomePage />} />
+        <Route index element={<SleepListPage />} />
+        <Route path="sleep">
+          <Route index element={<Navigate to="/" replace />} />
+          <Route path="new" element={<SleepCreatePage />} />
+          <Route path="edit/:id" element={<SleepEditPage />} />
+        </Route>
         <Route path="users">
           <Route index element={<UsersPage />} />
           <Route path="new" element={<CreateUserPage />} />

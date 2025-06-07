@@ -8,7 +8,7 @@ const MainLayout = () => {
           <div className="flex justify-between items-center">
             <div className="flex items-center">
               <Link to="/" className="text-xl font-bold text-primary-600">
-                풀스택 보일러플레이트
+                🌙 수면 기록 앱
               </Link>
             </div>
             <nav className="flex space-x-4">
@@ -16,7 +16,13 @@ const MainLayout = () => {
                 to="/"
                 className="text-neutral-600 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium"
               >
-                홈
+                수면 기록
+              </Link>
+              <Link
+                to="/sleep/new"
+                className="text-neutral-600 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium"
+              >
+                새 기록
               </Link>
               <Link
                 to="/users"
@@ -36,7 +42,7 @@ const MainLayout = () => {
       <footer className="bg-white border-t border-neutral-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <p className="text-center text-neutral-500 text-sm">
-            &copy; {new Date().getFullYear()} 풀스택 보일러플레이트. All rights reserved.
+            &copy; {new Date().getFullYear()} 수면 기록 앱. 건강한 수면 습관을 만들어보세요. 🌙
           </p>
         </div>
       </footer>
