@@ -9,6 +9,7 @@ import SleepListPage from './routes/sleep/SleepListPage'
 import SleepCreatePage from './routes/sleep/SleepCreatePage'
 import SleepEditPage from './routes/sleep/SleepEditPage'
 import SleepStatisticsPage from './routes/sleep/SleepStatisticsPage'
+import { AIAdvicePage } from './pages/AIAdvicePage'
 import NotFoundPage from './routes/NotFoundPage'
 
 function App() {
@@ -21,6 +22,7 @@ function App() {
           <Route path="new" element={<SleepCreatePage />} />
           <Route path="edit/:id" element={<SleepEditPage />} />
           <Route path="statistics" element={<SleepStatisticsPage />} />
+          <Route path="ai-advice" element={<AIAdvicePage />} />
         </Route>
         <Route path="users">
           <Route index element={<UsersPage />} />
