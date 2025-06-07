@@ -387,4 +387,208 @@ describe('Sleep Records API', () => {
       expect(body.error).toBe('Bad Request')
     })
   })
+
+  describe('GET /api/sleep-records/sleep-statistics', () => {
+    it('데이터가 없을 때 기본값을 반환해야 합니다', async () => {
+      const response = await app.inject({
+        method: 'GET',
+        url: '/api/sleep-records/sleep-statistics'
+      })
+
+      expect(response.statusCode).toBe(200)
+      const body = JSON.parse(response.body)
+      expect(body.success).toBe(true)
+      expect(body.data.overallAverage).toBe(0)
+      expect(body.data.weeklyAverages).toEqual({})
+      expect(body.data.weeklyTrends).toEqual([])
+    })
+
+    it('단일 수면 기록에 대한 통계를 계산해야 합니다', async () => {
+      const testData = {
+        date: '2024-01-01', // 2024년 1월 1일은 월요일
+        hours: 8,
+        note: '좋은 수면',
+        createdAt: '2024-01-01T00:00:00.000Z',
+        updatedAt: '2024-01-01T00:00:00.000Z'
+      }
+
+      await db.insert(sleepRecords).values(testData)
+
+      const response = await app.inject({
+        method: 'GET',
+        url: '/api/sleep-records/sleep-statistics'
+      })
+
+      expect(response.statusCode).toBe(200)
+      const body = JSON.parse(response.body)
+      expect(body.success).toBe(true)
+      expect(body.data.overallAverage).toBe(8)
+      expect(body.data.weeklyAverages['월']).toBe(8)
+      expect(body.data.weeklyTrends).toHaveLength(1)
+      expect(body.data.weeklyTrends[0]).toEqual({ week: 'Week 1', average: 8 })
+    })
+
+    it('복수 수면 기록에 대한 통계를 정확히 계산해야 합니다', async () => {
+      const testData = [
+        // 2024년 1월 첫째 주 (월~일)
+        {
+          date: '2024-01-01',
+          hours: 8,
+          note: '월요일',
+          createdAt: '2024-01-01T00:00:00.000Z',
+          updatedAt: '2024-01-01T00:00:00.000Z'
+        }, // 월
+        {
+          date: '2024-01-02',
+          hours: 7,
+          note: '화요일',
+          createdAt: '2024-01-02T00:00:00.000Z',
+          updatedAt: '2024-01-02T00:00:00.000Z'
+        }, // 화
+        {
+          date: '2024-01-03',
+          hours: 6,
+          note: '수요일',
+          createdAt: '2024-01-03T00:00:00.000Z',
+          updatedAt: '2024-01-03T00:00:00.000Z'
+        }, // 수
+        {
+          date: '2024-01-04',
+          hours: 9,
+          note: '목요일',
+          createdAt: '2024-01-04T00:00:00.000Z',
+          updatedAt: '2024-01-04T00:00:00.000Z'
+        }, // 목
+        {
+          date: '2024-01-05',
+          hours: 7.5,
+          note: '금요일',
+          createdAt: '2024-01-05T00:00:00.000Z',
+          updatedAt: '2024-01-05T00:00:00.000Z'
+        }, // 금
+        {
+          date: '2024-01-06',
+          hours: 8.5,
+          note: '토요일',
+          createdAt: '2024-01-06T00:00:00.000Z',
+          updatedAt: '2024-01-06T00:00:00.000Z'
+        }, // 토
+        {
+          date: '2024-01-07',
+          hours: 9,
+          note: '일요일',
+          createdAt: '2024-01-07T00:00:00.000Z',
+          updatedAt: '2024-01-07T00:00:00.000Z'
+        }, // 일
+
+        // 2024년 1월 둘째 주 시작
+        {
+          date: '2024-01-08',
+          hours: 6.5,
+          note: '둘째주 월',
+          createdAt: '2024-01-08T00:00:00.000Z',
+          updatedAt: '2024-01-08T00:00:00.000Z'
+        }, // 월
+        {
+          date: '2024-01-09',
+          hours: 7.5,
+          note: '둘째주 화',
+          createdAt: '2024-01-09T00:00:00.000Z',
+          updatedAt: '2024-01-09T00:00:00.000Z'
+        } // 화
+      ]
+
+      await db.insert(sleepRecords).values(testData)
+
+      const response = await app.inject({
+        method: 'GET',
+        url: '/api/sleep-records/sleep-statistics'
+      })
+
+      expect(response.statusCode).toBe(200)
+      const body = JSON.parse(response.body)
+      expect(body.success).toBe(true)
+
+      // 전체 평균: (8+7+6+9+7.5+8.5+9+6.5+7.5) / 9 = 69.5 / 9 = 7.72 (반올림) = 7.7
+      expect(body.data.overallAverage).toBe(7.7)
+
+      // 요일별 평균 확인
+      expect(body.data.weeklyAverages['월']).toBe(7.3) // (8 + 6.5) / 2 = 7.25 -> 7.3
+      expect(body.data.weeklyAverages['화']).toBe(7.3) // (7 + 7.5) / 2 = 7.25 -> 7.3
+      expect(body.data.weeklyAverages['수']).toBe(6) // 6 / 1 = 6
+      expect(body.data.weeklyAverages['목']).toBe(9) // 9 / 1 = 9
+      expect(body.data.weeklyAverages['금']).toBe(7.5) // 7.5 / 1 = 7.5
+      expect(body.data.weeklyAverages['토']).toBe(8.5) // 8.5 / 1 = 8.5
+      expect(body.data.weeklyAverages['일']).toBe(9) // 9 / 1 = 9
+
+      // 주간별 추이 확인 (7일 단위)
+      expect(body.data.weeklyTrends).toHaveLength(2)
+      expect(body.data.weeklyTrends[0]).toEqual({ week: 'Week 1', average: 7.9 }) // (8+7+6+9+7.5+8.5+9) / 7 = 7.86 -> 7.9
+      expect(body.data.weeklyTrends[1]).toEqual({ week: 'Week 2', average: 7 }) // (6.5+7.5) / 2 = 7
+    })
+
+    it('요일별 평균에서 데이터가 없는 요일은 0으로 처리해야 합니다', async () => {
+      const testData = [
+        {
+          date: '2024-01-01',
+          hours: 8,
+          note: '월요일만',
+          createdAt: '2024-01-01T00:00:00.000Z',
+          updatedAt: '2024-01-01T00:00:00.000Z'
+        }
+      ]
+
+      await db.insert(sleepRecords).values(testData)
+
+      const response = await app.inject({
+        method: 'GET',
+        url: '/api/sleep-records/sleep-statistics'
+      })
+
+      expect(response.statusCode).toBe(200)
+      const body = JSON.parse(response.body)
+      expect(body.success).toBe(true)
+
+      expect(body.data.weeklyAverages['월']).toBe(8)
+      expect(body.data.weeklyAverages['화']).toBe(0)
+      expect(body.data.weeklyAverages['수']).toBe(0)
+      expect(body.data.weeklyAverages['목']).toBe(0)
+      expect(body.data.weeklyAverages['금']).toBe(0)
+      expect(body.data.weeklyAverages['토']).toBe(0)
+      expect(body.data.weeklyAverages['일']).toBe(0)
+    })
+
+    it('소수점 수면 시간을 정확히 처리해야 합니다', async () => {
+      const testData = [
+        {
+          date: '2024-01-01',
+          hours: 7.5,
+          note: '7시간 30분',
+          createdAt: '2024-01-01T00:00:00.000Z',
+          updatedAt: '2024-01-01T00:00:00.000Z'
+        },
+        {
+          date: '2024-01-02',
+          hours: 8.5,
+          note: '8시간 30분',
+          createdAt: '2024-01-02T00:00:00.000Z',
+          updatedAt: '2024-01-02T00:00:00.000Z'
+        }
+      ]
+
+      await db.insert(sleepRecords).values(testData)
+
+      const response = await app.inject({
+        method: 'GET',
+        url: '/api/sleep-records/sleep-statistics'
+      })
+
+      expect(response.statusCode).toBe(200)
+      const body = JSON.parse(response.body)
+      expect(body.success).toBe(true)
+
+      // 전체 평균: (7.5 + 8.5) / 2 = 8.0
+      expect(body.data.overallAverage).toBe(8)
+    })
+  })
 })
