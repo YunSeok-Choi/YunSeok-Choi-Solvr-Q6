@@ -8,6 +8,7 @@ import EditUserPage from './routes/EditUserPage'
 import SleepListPage from './routes/sleep/SleepListPage'
 import SleepCreatePage from './routes/sleep/SleepCreatePage'
 import SleepEditPage from './routes/sleep/SleepEditPage'
+import SleepStatisticsPage from './routes/sleep/SleepStatisticsPage'
 import NotFoundPage from './routes/NotFoundPage'
 
 function App() {
@@ -19,6 +20,7 @@ function App() {
           <Route index element={<Navigate to="/" replace />} />
           <Route path="new" element={<SleepCreatePage />} />
           <Route path="edit/:id" element={<SleepEditPage />} />
+          <Route path="statistics" element={<SleepStatisticsPage />} />
         </Route>
         <Route path="users">
           <Route index element={<UsersPage />} />

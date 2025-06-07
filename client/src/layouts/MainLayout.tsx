@@ -25,6 +25,12 @@ const MainLayout = () => {
                 새 기록
               </Link>
               <Link
+                to="/sleep/statistics"
+                className="text-neutral-600 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium"
+              >
+                📊 통계
+              </Link>
+              <Link
                 to="/users"
                 className="text-neutral-600 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium"
               >
