@@ -3,7 +3,7 @@ import Database from 'better-sqlite3'
 import { mkdir } from 'fs/promises'
 import { dirname } from 'path'
 import env from '../config/env'
-import { users } from './schema'
+import { users, sleepRecords } from './schema'
 import { UserRole } from '../types'
 
 // 데이터베이스 디렉토리 생성 함수
@@ -64,6 +64,18 @@ async function runMigration() {
         name TEXT NOT NULL,
         email TEXT NOT NULL UNIQUE,
         role TEXT NOT NULL DEFAULT 'USER',
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+      )
+    `)
+
+    // sleep_records 테이블 생성
+    sqlite.exec(`
+      CREATE TABLE IF NOT EXISTS sleep_records (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        date TEXT NOT NULL,
+        hours INTEGER NOT NULL,
+        note TEXT,
         created_at TEXT NOT NULL,
         updated_at TEXT NOT NULL
       )
